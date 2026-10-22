@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.FormatListBulleted
+import androidx.compose.material.icons.automirrored.rounded.VolumeOff
 import androidx.compose.material.icons.rounded.*
 
 enum class PlayerButton(val displayName: String, val icon: ImageVector) {
@@ -11,6 +12,7 @@ enum class PlayerButton(val displayName: String, val icon: ImageVector) {
     VIDEO_TITLE("Title", Icons.Rounded.Title),
     SUBTITLES("Subtitles", Icons.Rounded.Subtitles),
     AUDIO_TRACK("Audio", Icons.Rounded.Audiotrack),
+    MUTE("Mute", Icons.AutoMirrored.Rounded.VolumeOff),
     DECODER("Decoder", Icons.Rounded.Memory),
     CHAPTERS("Chapters", Icons.AutoMirrored.Rounded.FormatListBulleted),
     SMART_ENHANCE("Enhance", Icons.Rounded.AutoAwesome),

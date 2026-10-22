@@ -552,6 +552,7 @@ fun ControlLayoutEditorScreen(
                                         PlayerButton.MORE_OPTIONS -> "Open speed controls and advanced settings"
                                         PlayerButton.BACKGROUND_PLAY -> "Toggle background audio playback mode"
                                         PlayerButton.SCREENSHOT -> "Take a screenshot of the current video frame"
+                                        PlayerButton.MUTE -> "Mute or unmute playback audio"
                                         else -> ""
                                     },
                                     style = MaterialTheme.typography.bodySmall,

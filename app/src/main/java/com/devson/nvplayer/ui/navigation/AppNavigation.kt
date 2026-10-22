@@ -1022,6 +1022,7 @@ fun AppNavigation(
             val audioTracks by playerVm.audioTracks.collectAsStateWithLifecycle()
             val audioBoosterEnabled by playerVm.audioBoosterEnabled.collectAsStateWithLifecycle()
             val audioBoostVolume by playerVm.audioBoostVolume.collectAsStateWithLifecycle()
+            val isMuted by playerVm.isMuted.collectAsStateWithLifecycle()
             val chapters by playerVm.chapters.collectAsStateWithLifecycle()
             val networkSpeedBytesPerSec by playerVm.networkSpeedBytesPerSec.collectAsStateWithLifecycle()
             val bufferDurationSeconds by playerVm.bufferDurationSeconds.collectAsStateWithLifecycle()
@@ -1137,6 +1138,8 @@ fun AppNavigation(
                 subtitleTracks = subtitleTracks,
                 audioTracks = audioTracks,
                 audioBoosterEnabled = audioBoosterEnabled,
+                isMuted = isMuted,
+                onToggleMute = { playerVm.toggleMute() },
                 onToggleAudioBooster = { playerVm.toggleAudioBooster(it) },
                 playbackSettings = playbackSettings,
                 settingsActions = settingsActions,

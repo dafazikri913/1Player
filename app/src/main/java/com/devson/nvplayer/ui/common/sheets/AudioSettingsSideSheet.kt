@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.VolumeOff
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -43,7 +44,9 @@ fun AudioSettingsSideSheet(
     visible: Boolean,
     audioTracks: List<TrackInfo>,
     audioBoosterEnabled: Boolean,
+    isMuted: Boolean = false,
     onToggleAudioBooster: (Boolean) -> Unit,
+    onToggleMute: (Boolean) -> Unit = {},
     onSelectAudioTrack: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -205,6 +208,77 @@ fun AudioSettingsSideSheet(
                         // Section 2: Audio Enhancement & Boost
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             SectionHeader(title = "Volume & Enhancement")
+
+                            Card(
+                                onClick = { onToggleMute(!isMuted) },
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (isMuted) {
+                                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.45f)
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.6f)
+                                    }
+                                ),
+                                border = BorderStroke(
+                                    width = if (isMuted) 1.5.dp else 1.dp,
+                                    color = if (isMuted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        modifier = Modifier.weight(1f),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Surface(
+                                            color = if (isMuted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceVariant,
+                                            contentColor = if (isMuted) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            shape = CircleShape,
+                                            modifier = Modifier.size(36.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    imageVector = if (isMuted) Icons.AutoMirrored.Rounded.VolumeOff else Icons.AutoMirrored.Rounded.VolumeUp,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+
+                                        Column {
+                                            Text(
+                                                text = "Mute Audio",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = if (isMuted) "Audio playback is muted" else "Silence video playback audio",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Switch(
+                                        checked = isMuted,
+                                        onCheckedChange = onToggleMute,
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = MaterialTheme.colorScheme.error,
+                                            checkedTrackColor = MaterialTheme.colorScheme.errorContainer
+                                        )
+                                    )
+                                }
+                            }
 
                             Card(
                                 onClick = { onToggleAudioBooster(!audioBoosterEnabled) },

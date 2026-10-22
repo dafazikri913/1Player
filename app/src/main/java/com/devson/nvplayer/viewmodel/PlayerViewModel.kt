@@ -194,6 +194,8 @@ class PlayerViewModel(
     private val _audioBoostVolume = MutableStateFlow(100)
     val audioBoostVolume: StateFlow<Int> = _audioBoostVolume.asStateFlow()
 
+    val isMuted: StateFlow<Boolean> = playerEngine.isMuted
+
     private val settingsRepo = PlaybackSettingsRepository(application.applicationContext)
     val playbackSettings = settingsRepo.playbackSettingsFlow
 
@@ -563,6 +565,14 @@ class PlayerViewModel(
         }
     }
 
+    fun setMute(muted: Boolean) {
+        playerEngine.setMute(muted)
+    }
+
+    fun toggleMute() {
+        playerEngine.setMute(!playerEngine.isMuted.value)
+    }
+
     fun cycleAspectMode() {
         val current = playbackSettings.value.aspectMode
         val nextMode = current.next()
@@ -810,6 +820,7 @@ class PlayerViewModel(
             } else {
                 playerEngine.setMpvVolume(100.0)
             }
+            playerEngine.setMute(playerEngine.isMuted.value)
 
             // 4. Apply saved aspect mode
             playerEngine.setAspectMode(playbackSettings.value.aspectMode)

@@ -80,6 +80,8 @@ fun GestureOverlay(
     onSetDynamicSpeedActive: (Boolean) -> Unit = {},
     onSaveTapAndHoldSpeed: (Float) -> Unit = {},
     currentPositionProvider: (() -> Long)? = null,
+    isMuted: Boolean = false,
+    onToggleMute: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -109,8 +111,12 @@ fun GestureOverlay(
 
     var lastUnmutedVolume by remember { mutableIntStateOf(maxVolume / 2) }
     var muteOverlayVisible by remember { mutableStateOf(false) }
-    var isMutedState by remember { mutableStateOf(false) }
+    var isMutedState by remember { mutableStateOf(isMuted) }
     var muteOverlayTick by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(isMuted) {
+        isMutedState = isMuted
+    }
 
     LaunchedEffect(muteOverlayTick) {
         if (muteOverlayTick > 0) {
@@ -210,7 +216,8 @@ fun GestureOverlay(
         onShowMuteIcon: (Boolean) -> Unit,
         onTakeVideoScreenshot: () -> Unit,
         onTriggerMuteOverlay: (Boolean) -> Unit,
-        isMuted: Boolean
+        isMuted: Boolean,
+        onToggleMute: () -> Unit = {}
     ) {
         when (action) {
             MultiFingerAction.PLAY_PAUSE -> {
@@ -229,19 +236,10 @@ fun GestureOverlay(
                 }
             }
             MultiFingerAction.MUTE -> {
-                if (isMuted) {
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, lastUnmutedVolume, 0)
-                    onShowMuteIcon(false)
-                    onTriggerMuteOverlay(false)
-                } else {
-                    val currentVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                    if (currentVol > 0) {
-                        onLastUnmutedVolumeChanged(currentVol)
-                    }
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0)
-                    onShowMuteIcon(true)
-                    onTriggerMuteOverlay(true)
-                }
+                onToggleMute()
+                val nextMuted = !isMuted
+                onShowMuteIcon(nextMuted)
+                onTriggerMuteOverlay(nextMuted)
             }
             MultiFingerAction.SCREENSHOT -> {
                 onTakeVideoScreenshot()
@@ -482,7 +480,8 @@ fun GestureOverlay(
                                                 isMutedState = isMuted
                                                 muteOverlayTick++
                                             },
-                                            isMuted = isMutedState
+                                            isMuted = isMutedState,
+                                            onToggleMute = onToggleMute
                                         )
                                     } else if (dragStarted) {
                                         if (isSeekDrag) {

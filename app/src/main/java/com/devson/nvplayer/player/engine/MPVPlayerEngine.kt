@@ -113,6 +113,9 @@ class MPVPlayerEngine(private val context: Context) : PlayerEngine, MPVLib.Event
     private val _mediaTitle = MutableStateFlow("")
     override val mediaTitle: StateFlow<String> = _mediaTitle.asStateFlow()
 
+    private val _isMuted = MutableStateFlow(false)
+    override val isMuted: StateFlow<Boolean> = _isMuted.asStateFlow()
+
     private var lastTimePosDispatchMs = 0L
     @Volatile
     private var isScrubbingOrSeeking = false
@@ -249,6 +252,7 @@ class MPVPlayerEngine(private val context: Context) : PlayerEngine, MPVLib.Event
             MPVLib.observeProperty("duration", MPVLib.MpvFormat.MPV_FORMAT_DOUBLE)
             MPVLib.observeProperty("pause", MPVLib.MpvFormat.MPV_FORMAT_FLAG)
             MPVLib.observeProperty("eof-reached", MPVLib.MpvFormat.MPV_FORMAT_FLAG)
+            MPVLib.observeProperty("mute", MPVLib.MpvFormat.MPV_FORMAT_FLAG)
 
             // Observe video dimension properties as standard long integers
             MPVLib.observeProperty("video-params/w", MPVLib.MpvFormat.MPV_FORMAT_INT64)
@@ -1068,6 +1072,7 @@ class MPVPlayerEngine(private val context: Context) : PlayerEngine, MPVLib.Event
 
     override fun setMute(isMuted: Boolean) {
         try {
+            _isMuted.value = isMuted
             MPVLib.setPropertyBoolean("mute", isMuted)
         } catch (e: Exception) {
             Log.e("MPVPlayerEngine", "Failed to set mute state", e)
@@ -1075,11 +1080,7 @@ class MPVPlayerEngine(private val context: Context) : PlayerEngine, MPVLib.Event
     }
 
     override fun isMuted(): Boolean {
-        return try {
-            MPVLib.getPropertyBoolean("mute") ?: false
-        } catch (e: Exception) {
-            false
-        }
+        return _isMuted.value
     }
 
     override fun getEstimatedFrameCount(): Long {
@@ -1472,6 +1473,9 @@ class MPVPlayerEngine(private val context: Context) : PlayerEngine, MPVLib.Event
                 _playbackState.value = PlayerState.Ended
                 _isPlaying.value = false
             }
+        } else if (property == "mute") {
+            Log.d("MPVPlayerEngine", "Property Changed: mute = $value")
+            _isMuted.value = value
         }
     }
 
@@ -1536,6 +1540,11 @@ class MPVPlayerEngine(private val context: Context) : PlayerEngine, MPVLib.Event
                 restorePendingQualityTracks()
                 updateChapters()
                 togglePerformanceOverlayFromConf()
+                if (_isMuted.value) {
+                    try {
+                        MPVLib.setPropertyBoolean("mute", true)
+                    } catch (_: Exception) {}
+                }
                 val settings = settingsRepo.playbackSettingsFlow.value
                 setAmbientMode(settings.isAmbientModeEnabled, settings.ambientBlurStyle)
             }

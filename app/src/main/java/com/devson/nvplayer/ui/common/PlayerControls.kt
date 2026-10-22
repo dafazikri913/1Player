@@ -33,7 +33,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.VolumeOff
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -117,6 +118,8 @@ fun PlayerControls(
     showControlGradients: Boolean = true,
     onTitleClick: () -> Unit = {},
     onScreenshotClick: () -> Unit = {},
+    isMuted: Boolean = false,
+    onToggleMute: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -256,7 +259,9 @@ fun PlayerControls(
                 currentQualityLabel = currentQualityLabel,
                 onShowQuality = onShowQuality,
                 onTitleClick = onTitleClick,
-                onScreenshotClick = onScreenshotClick
+                onScreenshotClick = onScreenshotClick,
+                isMuted = isMuted,
+                onToggleMute = onToggleMute
             )
         }
 
@@ -537,7 +542,9 @@ fun PlayerControls(
                         currentQualityLabel = currentQualityLabel,
                         onShowQuality = onShowQuality,
                         onTitleClick = onTitleClick,
-                        onScreenshotClick = onScreenshotClick
+                        onScreenshotClick = onScreenshotClick,
+                        isMuted = isMuted,
+                        onToggleMute = onToggleMute
                     )
                 }
             }
@@ -576,7 +583,9 @@ fun PlayerControls(
                         currentQualityLabel = currentQualityLabel,
                         onShowQuality = onShowQuality,
                         onTitleClick = onTitleClick,
-                        onScreenshotClick = onScreenshotClick
+                        onScreenshotClick = onScreenshotClick,
+                        isMuted = isMuted,
+                        onToggleMute = onToggleMute
                     )
                 }
             }
@@ -811,7 +820,9 @@ fun PlayerControls(
                                         isBackgroundPlayEnabled = isBackgroundPlayEnabled,
                                         onBackgroundPlayClick = onBackgroundPlayClick,
                                         onTitleClick = onTitleClick,
-                                        onScreenshotClick = onScreenshotClick
+                                        onScreenshotClick = onScreenshotClick,
+                                        isMuted = isMuted,
+                                        onToggleMute = onToggleMute
                                     )
                                 }
                             }
@@ -845,7 +856,9 @@ fun PlayerControls(
                                 isBackgroundPlayEnabled = isBackgroundPlayEnabled,
                                 onBackgroundPlayClick = onBackgroundPlayClick,
                                 onTitleClick = onTitleClick,
-                                onScreenshotClick = onScreenshotClick
+                                onScreenshotClick = onScreenshotClick,
+                                isMuted = isMuted,
+                                onToggleMute = onToggleMute
                             )
                         }
                     }
@@ -1026,7 +1039,9 @@ fun RenderPlayerButton(
     currentQualityLabel: String = "",
     onShowQuality: () -> Unit = {},
     onTitleClick: () -> Unit = {},
-    onScreenshotClick: () -> Unit = {}
+    onScreenshotClick: () -> Unit = {},
+    isMuted: Boolean = false,
+    onToggleMute: () -> Unit = {}
 ) {
     if (button == PlayerButton.VIDEO_TITLE) {
         Column(
@@ -1064,6 +1079,7 @@ fun RenderPlayerButton(
             PlayerButton.BACKGROUND_PLAY -> onBackgroundPlayClick()
             PlayerButton.STREAM_QUALITY -> onShowQuality()
             PlayerButton.SCREENSHOT -> onScreenshotClick()
+            PlayerButton.MUTE -> onToggleMute()
             PlayerButton.SCREEN_ROTATION -> {
                 activity?.let { act ->
                     val currentOrientation = act.requestedOrientation
@@ -1146,13 +1162,21 @@ fun RenderPlayerButton(
                         AspectMode.CROP -> AspectIcons.Crop
                         AspectMode.ORIGINAL -> AspectIcons.Original
                     }
+                } else if (button == PlayerButton.MUTE) {
+                    if (isMuted) Icons.AutoMirrored.Rounded.VolumeOff else Icons.AutoMirrored.Rounded.VolumeUp
                 } else {
                     button.icon
                 }
                 Icon(
                     imageVector = icon,
                     contentDescription = button.displayName,
-                    tint = if ((isSmartEnhance && isSmartEnhanceEnabled) || (isBgPlay && isBackgroundPlayEnabled)) themePrimary else Color.White.copy(alpha = 0.85f),
+                    tint = if ((isSmartEnhance && isSmartEnhanceEnabled) || (isBgPlay && isBackgroundPlayEnabled)) {
+                        themePrimary
+                    } else if (button == PlayerButton.MUTE && isMuted) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        Color.White.copy(alpha = 0.85f)
+                    },
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -1219,13 +1243,21 @@ fun RenderPlayerButton(
                         AspectMode.CROP -> AspectIcons.Crop
                         AspectMode.ORIGINAL -> AspectIcons.Original
                     }
+                } else if (button == PlayerButton.MUTE) {
+                    if (isMuted) Icons.AutoMirrored.Rounded.VolumeOff else Icons.AutoMirrored.Rounded.VolumeUp
                 } else {
                     button.icon
                 }
                 Icon(
                     imageVector = icon,
                     contentDescription = button.displayName,
-                    tint = if ((isSmartEnhance && isSmartEnhanceEnabled) || (isBgPlay && isBackgroundPlayEnabled)) themePrimary else Color.White.copy(alpha = 0.85f),
+                    tint = if ((isSmartEnhance && isSmartEnhanceEnabled) || (isBgPlay && isBackgroundPlayEnabled)) {
+                        themePrimary
+                    } else if (button == PlayerButton.MUTE && isMuted) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        Color.White.copy(alpha = 0.85f)
+                    },
                     modifier = Modifier.size(20.dp)
                 )
             }

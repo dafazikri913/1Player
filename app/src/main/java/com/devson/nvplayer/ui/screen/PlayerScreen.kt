@@ -134,6 +134,8 @@ fun PlayerScreen(
     audioTracks: List<TrackInfo> = emptyList(),
     audioBoosterEnabled: Boolean = false,
     audioBoostVolume: Int = 100,
+    isMuted: Boolean = false,
+    onToggleMute: () -> Unit = {},
     onToggleAudioBooster: (Boolean) -> Unit = {},
     onSetAudioBoostVolume: (Int) -> Unit = {},
     playbackSettings: PlaybackSettings = PlaybackSettings(),
@@ -178,6 +180,15 @@ fun PlayerScreen(
         ?: activeViewModel?.let { vm -> { vm.bufferedPosition.value } }
         ?: { bufferedPosition }
     val engineMediaTitle by (activeViewModel?.mediaTitle ?: kotlinx.coroutines.flow.MutableStateFlow("")).collectAsStateWithLifecycle()
+    val isMutedFromVm by (activeViewModel?.isMuted ?: kotlinx.coroutines.flow.MutableStateFlow(false)).collectAsStateWithLifecycle()
+    val effectiveIsMuted = if (activeViewModel != null) isMutedFromVm else isMuted
+    val effectiveOnToggleMute: () -> Unit = {
+        if (activeViewModel != null) {
+            activeViewModel.toggleMute()
+        } else {
+            onToggleMute()
+        }
+    }
     val currentUri by (activeViewModel?.currentUri ?: kotlinx.coroutines.flow.MutableStateFlow(null)).collectAsStateWithLifecycle()
     val activeVideoWidth by (activeViewModel?.videoWidth ?: kotlinx.coroutines.flow.MutableStateFlow(0L)).collectAsStateWithLifecycle()
     val activeVideoHeight by (activeViewModel?.videoHeight ?: kotlinx.coroutines.flow.MutableStateFlow(0L)).collectAsStateWithLifecycle()
@@ -723,7 +734,9 @@ fun PlayerScreen(
                             onSetAudioBoostVolume = onSetAudioBoostVolume,
                             isDynamicSpeedActive = isDynamicSpeedActive,
                             onSetDynamicSpeedActive = onSetDynamicSpeedActive,
-                            onSaveTapAndHoldSpeed = settingsActions.onUpdateTapAndHoldSpeed
+                            onSaveTapAndHoldSpeed = settingsActions.onUpdateTapAndHoldSpeed,
+                            isMuted = effectiveIsMuted,
+                            onToggleMute = effectiveOnToggleMute
                         )
                     }
                 }
@@ -847,6 +860,8 @@ fun PlayerScreen(
                              ytdlQuality = playbackSettings.ytdlQuality,
                              currentQualityLabel = streamQualityState.currentQuality?.label ?: if (playbackSettings.ytdlQuality == -1) "Auto" else "${playbackSettings.ytdlQuality}p",
                             onShowQuality = { showQualitySideSheet = true },
+                            isMuted = effectiveIsMuted,
+                            onToggleMute = effectiveOnToggleMute,
                             modifier = Modifier
                         )
                     }
@@ -1017,6 +1032,8 @@ fun PlayerScreen(
             subtitleActions = subtitleActions,
             enhanceActions = enhanceActions,
             onToggleAudioBooster = onToggleAudioBooster,
+            isMuted = effectiveIsMuted,
+            onToggleMute = { effectiveOnToggleMute() },
             onSelectChapter = onSelectChapter,
             onUpdateDecoderMode = onUpdateDecoderMode,
             activeViewModel = activeViewModel,
@@ -1629,12 +1646,14 @@ private fun PlayerSideSheets(
     subtitleTracks: List<TrackInfo>,
     audioTracks: List<TrackInfo>,
     audioBoosterEnabled: Boolean,
+    isMuted: Boolean = false,
     chapters: List<ChapterInfo>,
     streamQualityState: com.devson.nvplayer.data.model.StreamQualityState,
     settingsActions: PlayerSettingsActions,
     subtitleActions: PlayerSubtitleActions,
     enhanceActions: PlayerEnhanceActions,
     onToggleAudioBooster: (Boolean) -> Unit,
+    onToggleMute: (Boolean) -> Unit = {},
     onSelectChapter: (Int) -> Unit,
     onUpdateDecoderMode: (DecoderMode) -> Unit,
     activeViewModel: com.devson.nvplayer.viewmodel.PlayerViewModel?,
@@ -1719,7 +1738,9 @@ private fun PlayerSideSheets(
         visible = visibleAudioSheet,
         audioTracks = audioTracks,
         audioBoosterEnabled = audioBoosterEnabled,
+        isMuted = isMuted,
         onToggleAudioBooster = onToggleAudioBooster,
+        onToggleMute = onToggleMute,
         onSelectAudioTrack = { activeViewModel?.selectAudioTrack(it) },
         onDismiss = onDismissAudioSheet
     )

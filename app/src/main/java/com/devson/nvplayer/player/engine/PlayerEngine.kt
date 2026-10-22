@@ -24,6 +24,7 @@ interface PlayerEngine {
     val bufferDurationSeconds: StateFlow<Double>
     val bufferedPosition: StateFlow<Long>
     val mediaTitle: StateFlow<String>
+    val isMuted: StateFlow<Boolean>
 
     fun loadVideo(uri: Uri)
     fun play()
